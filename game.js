@@ -25,6 +25,11 @@ const ui = {
 };
 
 const SAVE_KEY = "takeout-thief-3d-best";
+const THEME_VOLUME = 0.16;
+const THEME_DUCK_VOLUME = 0.07;
+const MUSIC_BPM = 128;
+const MUSIC_BEAT_SECONDS = 60 / MUSIC_BPM;
+const MUSIC_BEAT_OFFSET = 0.04;
 const lanes = [-3.1, 0, 3.1];
 const laneIds = [-1, 0, 1];
 const clock = new THREE.Clock();
@@ -69,6 +74,7 @@ const state = {
   shake: 0,
   hitStop: 0,
   slowMo: 0,
+  musicPulse: 0,
   sound: true,
   best: Number(localStorage.getItem(SAVE_KEY) || 0),
   mission: null,
@@ -94,6 +100,11 @@ const player = {
   magnet: 0,
   invincible: 0,
   perfectStreak: 0,
+};
+
+const musicBeat = {
+  lastBeat: -1,
+  energy: 0,
 };
 
 const thief = {
@@ -137,10 +148,14 @@ scene.add(world, roadGroup, buildingGroup, actorGroup, fxGroup);
 let courier;
 let thiefModel;
 let audioCtx = null;
+let musicSource = null;
+let musicAnalyser = null;
+let musicBins = null;
+let themeDuckTimer = null;
 let dangerStrips = [];
 const themeMusic = new Audio("./assets/theme.mp3");
 themeMusic.loop = true;
-themeMusic.volume = .42;
+themeMusic.volume = THEME_VOLUME;
 
 init();
 
@@ -488,6 +503,8 @@ function resetGame() {
   state.shake = 0;
   state.hitStop = 0;
   state.slowMo = 0;
+  state.musicPulse = 0;
+  musicBeat.lastBeat = -1;
   player.lane = 1;
   player.laneFloat = 1;
   player.x = 0;
@@ -601,9 +618,11 @@ function update(dt, rawDt) {
     return;
   }
 
+  updateMusicPulse(rawDt);
   state.distance += state.speed * dt * .72;
   state.baseSpeed = Math.min(38, 24 + state.distance * .008);
-  state.speed = lerp(state.speed, state.baseSpeed + (state.skill > 0 ? 10 : 0), .035);
+  const musicBoost = state.musicPulse * (state.skill > 0 ? 3.4 : 4.8);
+  state.speed = lerp(state.speed, state.baseSpeed + (state.skill > 0 ? 10 : 0) + musicBoost, .045);
   state.score += dt * state.speed * (2.8 + Math.floor(state.combo) * .48);
   state.hotLaneTimer -= dt;
   if (state.hotLaneTimer <= 0) {
@@ -1260,10 +1279,66 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 
+function ensureAudioContext() {
+  audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+  return audioCtx;
+}
+
+function setupMusicAnalysis() {
+  if (!audioCtx || musicAnalyser) return;
+  try {
+    musicSource ||= audioCtx.createMediaElementSource(themeMusic);
+    musicAnalyser = audioCtx.createAnalyser();
+    musicAnalyser.fftSize = 128;
+    musicBins = new Uint8Array(musicAnalyser.frequencyBinCount);
+    musicSource.connect(musicAnalyser);
+    musicAnalyser.connect(audioCtx.destination);
+  } catch {
+    musicAnalyser = null;
+    musicBins = null;
+  }
+}
+
+function updateMusicPulse(dt) {
+  if (!state.sound || themeMusic.paused) {
+    state.musicPulse = Math.max(0, state.musicPulse - dt * 3.5);
+    return;
+  }
+
+  const beat = Math.floor((themeMusic.currentTime + MUSIC_BEAT_OFFSET) / MUSIC_BEAT_SECONDS);
+  if (beat !== musicBeat.lastBeat) {
+    musicBeat.lastBeat = beat;
+    state.musicPulse = Math.max(state.musicPulse, 1);
+  }
+
+  if (musicAnalyser && musicBins) {
+    musicAnalyser.getByteFrequencyData(musicBins);
+    const bassBins = Math.min(14, musicBins.length);
+    let bass = 0;
+    for (let i = 0; i < bassBins; i += 1) bass += musicBins[i];
+    bass = bass / (bassBins * 255);
+    musicBeat.energy = lerp(musicBeat.energy, bass, .12);
+    state.musicPulse = Math.max(state.musicPulse, clamp((bass - musicBeat.energy) * 5.4, 0, 1));
+  }
+
+  state.musicPulse = Math.max(0, state.musicPulse - dt * 4.2);
+}
+
+function duckTheme(duration = .16) {
+  if (!state.sound || themeMusic.paused) return;
+  themeMusic.volume = THEME_DUCK_VOLUME;
+  clearTimeout(themeDuckTimer);
+  themeDuckTimer = setTimeout(() => {
+    themeMusic.volume = THEME_VOLUME;
+  }, duration * 1000);
+}
+
 function beep(freq, duration, type = "sine", gain = .035) {
   if (!state.sound) return;
   try {
-    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = ensureAudioContext();
+    if (gain >= .035) duckTheme(Math.max(.12, duration + .07));
     const osc = audioCtx.createOscillator();
     const amp = audioCtx.createGain();
     osc.type = type;
@@ -1282,12 +1357,21 @@ function beep(freq, duration, type = "sine", gain = .035) {
 
 function playTheme() {
   if (!state.sound || state.mode !== "running") return;
+  try {
+    audioCtx = ensureAudioContext();
+    setupMusicAnalysis();
+  } catch {
+    // The music can still play as a normal audio element if analysis is blocked.
+  }
+  themeMusic.volume = THEME_VOLUME;
   themeMusic.play().catch(() => {
     // Browsers require a user gesture before audio can start.
   });
 }
 
 function pauseTheme() {
+  clearTimeout(themeDuckTimer);
+  themeMusic.volume = THEME_VOLUME;
   themeMusic.pause();
 }
 
