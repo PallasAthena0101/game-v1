@@ -138,6 +138,9 @@ let courier;
 let thiefModel;
 let audioCtx = null;
 let dangerStrips = [];
+const themeMusic = new Audio("./assets/theme.mp3");
+themeMusic.loop = true;
+themeMusic.volume = .42;
 
 init();
 
@@ -502,6 +505,7 @@ function resetGame() {
   chooseMission();
   ui.overlay.classList.remove("is-visible");
   ui.pauseButton.textContent = "Ⅱ";
+  playTheme();
   beep(520, .05, "triangle", .04);
 }
 
@@ -557,6 +561,7 @@ function setGameOver() {
   ui.bestScore.textContent = String(state.best);
   ui.startButton.textContent = "再追";
   ui.overlay.classList.add("is-visible");
+  pauseTheme();
   state.shake = 1.2;
   spawnBurst(courier.root.position, palette.red, 34, 1.4);
   beep(110, .18, "sawtooth", .08);
@@ -572,10 +577,12 @@ function togglePause() {
     ui.startButton.textContent = "继续";
     ui.pauseButton.textContent = "▶";
     ui.overlay.classList.add("is-visible");
+    pauseTheme();
   } else if (state.mode === "paused") {
     state.mode = "running";
     ui.pauseButton.textContent = "Ⅱ";
     ui.overlay.classList.remove("is-visible");
+    playTheme();
   }
 }
 
@@ -1146,7 +1153,12 @@ function bindControls() {
   ui.soundButton.addEventListener("click", () => {
     state.sound = !state.sound;
     ui.soundButton.textContent = state.sound ? "♪" : "×";
-    if (state.sound) beep(540, .05, "triangle", .03);
+    if (state.sound) {
+      if (state.mode === "running") playTheme();
+      beep(540, .05, "triangle", .03);
+    } else {
+      pauseTheme();
+    }
   });
 
   const bindTouch = (id, action) => {
@@ -1266,6 +1278,17 @@ function beep(freq, duration, type = "sine", gain = .035) {
   } catch {
     state.sound = false;
   }
+}
+
+function playTheme() {
+  if (!state.sound || state.mode !== "running") return;
+  themeMusic.play().catch(() => {
+    // Browsers require a user gesture before audio can start.
+  });
+}
+
+function pauseTheme() {
+  themeMusic.pause();
 }
 
 function clamp(value, min, max) {
