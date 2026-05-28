@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>小偷还我外卖</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="game-shell" aria-label="小偷还我外卖 3D 跑酷">
+    <canvas id="game"></canvas>
+
+    <section class="topbar" aria-label="状态">
+      <div class="brand">
+        <span class="brand__badge">抢</span>
+        <span>
+          <strong>小偷还我外卖</strong>
+          <small>3D TAKEOUT CHASE</small>
+        </span>
+      </div>
+
+      <div class="scoreline">
+        <div>
+          <span>分数</span>
+          <strong id="score">0</strong>
+        </div>
+        <div>
+          <span>连击</span>
+          <strong id="combo">x1</strong>
+        </div>
+        <div>
+          <span>距离</span>
+          <strong id="distance">0m</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="side-hud" aria-label="追击信息">
+      <div class="meter">
+        <span>餐盒完整度</span>
+        <div class="meter__track"><i id="integrityFill"></i></div>
+      </div>
+      <div class="meter">
+        <span>怒气</span>
+        <div class="meter__track meter__track--hot"><i id="rageFill"></i></div>
+      </div>
+      <div class="mission">
+        <span id="missionName">夜宵单</span>
+        <strong id="missionProgress">0/8</strong>
+      </div>
+      <div class="mission mobile-score">
+        <span>分数</span>
+        <strong id="mobileScore">0</strong>
+      </div>
+      <div class="mission mission--risk">
+        <span>风险倍率</span>
+        <strong id="riskText">1.0x</strong>
+      </div>
+    </section>
+
+    <section class="skill-dock" aria-label="技能">
+      <button id="skillButton" class="skill-button" type="button" aria-label="怒气爆发">
+        <span>爆</span>
+        <i id="skillCooldown"></i>
+      </button>
+      <button id="pauseButton" class="round-button" type="button" aria-label="暂停">Ⅱ</button>
+      <button id="soundButton" class="round-button" type="button" aria-label="声音">♪</button>
+    </section>
+
+    <section id="overlay" class="overlay is-visible" aria-live="polite">
+      <div class="title-lockup">
+        <p id="kicker">外卖被抢，追回热乎的那一口</p>
+        <h1 id="title">小偷还我外卖</h1>
+        <div class="record">
+          <span id="recordLabel">最佳</span>
+          <strong id="bestScore">0</strong>
+        </div>
+      </div>
+      <button id="startButton" class="primary-button" type="button">开追</button>
+    </section>
+
+    <nav class="touch-controls" aria-label="触屏操作">
+      <button id="touchLeft" type="button" aria-label="左移">‹</button>
+      <button id="touchJump" type="button" aria-label="跳跃">⌃</button>
+      <button id="touchSlide" type="button" aria-label="滑铲">⌄</button>
+      <button id="touchRight" type="button" aria-label="右移">›</button>
+    </nav>
+  </main>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

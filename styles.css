@@ -1,0 +1,450 @@
+:root {
+  color-scheme: dark;
+  --ink: #f8fbff;
+  --soft: rgba(248, 251, 255, .7);
+  --glass: rgba(6, 12, 22, .58);
+  --line: rgba(255, 255, 255, .16);
+  --yellow: #ffd13d;
+  --cyan: #27d9ff;
+  --red: #ff4268;
+  --green: #54eba2;
+  font-family: Inter, "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #050914;
+}
+
+body {
+  color: var(--ink);
+  touch-action: none;
+  user-select: none;
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+.game-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-height: 460px;
+  overflow: hidden;
+  background: #050914;
+}
+
+#game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.topbar,
+.side-hud,
+.skill-dock,
+.touch-controls,
+.overlay {
+  position: absolute;
+  z-index: 5;
+}
+
+.topbar {
+  top: max(14px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.brand,
+.scoreline,
+.side-hud,
+.skill-dock,
+.record {
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(7, 14, 27, .72), rgba(9, 20, 36, .44));
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .24);
+}
+
+.brand {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px 9px 10px;
+  border-radius: 8px;
+}
+
+.brand__badge {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--red), var(--yellow));
+  color: #1b080d;
+  font-weight: 950;
+}
+
+.brand strong {
+  display: block;
+  font-size: clamp(15px, 1.8vw, 20px);
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.brand small {
+  display: block;
+  margin-top: 4px;
+  color: var(--soft);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.scoreline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(78px, 1fr));
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.scoreline div {
+  min-width: 78px;
+  padding: 9px 14px 10px;
+  text-align: right;
+  background: rgba(255, 255, 255, .045);
+  border-left: 1px solid rgba(255, 255, 255, .08);
+}
+
+.scoreline span,
+.meter span,
+.mission span,
+.record span {
+  display: block;
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.scoreline strong {
+  display: block;
+  margin-top: 3px;
+  font-size: clamp(18px, 2.1vw, 27px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.side-hud {
+  top: calc(max(14px, env(safe-area-inset-top)) + 76px);
+  right: max(14px, env(safe-area-inset-right));
+  width: min(270px, calc(100vw - 28px));
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.meter__track {
+  height: 10px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .13);
+}
+
+.meter__track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--cyan), var(--yellow));
+  box-shadow: 0 0 18px rgba(39, 217, 255, .42);
+}
+
+.meter__track--hot i {
+  width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--yellow));
+  box-shadow: 0 0 18px rgba(255, 66, 104, .5);
+}
+
+.mission {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding-top: 2px;
+}
+
+.mobile-score {
+  display: none;
+}
+
+.mission strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-dock {
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border-radius: 8px;
+}
+
+.skill-button,
+.round-button,
+.touch-controls button,
+.primary-button {
+  border: 0;
+  cursor: pointer;
+}
+
+.skill-button {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ff315c, #ffd13d);
+  color: #19070b;
+  font-size: 25px;
+  font-weight: 950;
+  box-shadow: 0 16px 36px rgba(255, 66, 104, .34);
+}
+
+.skill-button i {
+  position: absolute;
+  inset: auto 0 0;
+  height: 0%;
+  background: rgba(0, 0, 0, .42);
+  pointer-events: none;
+}
+
+.round-button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .14);
+  font-weight: 950;
+}
+
+.overlay {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(255, 209, 61, .13), transparent 24%),
+    linear-gradient(180deg, rgba(4, 8, 16, .08), rgba(4, 8, 16, .62));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
+
+.overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.title-lockup {
+  width: min(820px, 94vw);
+  text-align: center;
+  text-shadow: 0 14px 38px rgba(0, 0, 0, .5);
+}
+
+.title-lockup p {
+  margin: 0 0 10px;
+  color: var(--yellow);
+  font-size: clamp(14px, 2vw, 20px);
+  font-weight: 950;
+}
+
+.title-lockup h1 {
+  margin: 0;
+  font-size: clamp(42px, 8vw, 98px);
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.record {
+  width: fit-content;
+  min-width: 132px;
+  margin: 16px auto 0;
+  padding: 10px 16px 12px;
+  border-radius: 8px;
+}
+
+.record strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+}
+
+.primary-button {
+  min-width: 156px;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--red), var(--yellow));
+  color: #18070c;
+  font-size: 20px;
+  font-weight: 950;
+  box-shadow: 0 20px 46px rgba(255, 66, 104, .34);
+}
+
+.skill-button:active,
+.round-button:active,
+.touch-controls button:active,
+.primary-button:active {
+  transform: translateY(1px) scale(.98);
+}
+
+.touch-controls {
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: none;
+  grid-template-columns: repeat(4, 55px);
+  gap: 9px;
+  transform: translateX(-50%);
+}
+
+.touch-controls button {
+  width: 55px;
+  height: 55px;
+  border-radius: 8px;
+  background: rgba(7, 14, 27, .62);
+  border: 1px solid rgba(255, 255, 255, .19);
+  backdrop-filter: blur(14px);
+  font-size: 31px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .touch-controls {
+    display: grid;
+  }
+
+  .skill-dock {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 70px);
+  }
+}
+
+@media (max-width: 760px) {
+  .game-shell {
+    min-height: 420px;
+  }
+
+  .brand {
+    height: 52px;
+    max-width: 47vw;
+    padding: 8px;
+  }
+
+  .brand__badge {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .scoreline {
+    display: none;
+  }
+
+  .scoreline span {
+    font-size: 10px;
+  }
+
+  .side-hud {
+    top: auto;
+    left: max(14px, env(safe-area-inset-left));
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 74px);
+    width: auto;
+    grid-template-columns: 1fr 1fr;
+    padding: 9px;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .side-hud .mission {
+    min-height: 30px;
+  }
+
+  .mobile-score {
+    display: flex;
+  }
+
+  .meter span,
+  .mission span {
+    font-size: 10px;
+  }
+
+  .meter__track {
+    height: 8px;
+    margin-top: 5px;
+  }
+
+  .skill-dock {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    padding: 7px;
+  }
+
+  .skill-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .round-button {
+    width: 38px;
+    height: 38px;
+  }
+
+  .title-lockup h1 {
+    font-size: clamp(32px, 8.4vw, 56px);
+  }
+}
+
+@media (max-height: 620px) {
+  .touch-controls {
+    left: max(14px, env(safe-area-inset-left));
+    right: auto;
+    transform: none;
+  }
+}

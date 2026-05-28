@@ -1,0 +1,17 @@
+{
+  "name": "takeout-thief-runner",
+  "version": "1.0.0",
+  "description": "Three.js 3D takeout chase runner.",
+  "main": "game.js",
+  "type": "module",
+  "scripts": {
+    "check": "node --check game.js",
+    "start": "python -m http.server 8123 --bind 127.0.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.184.0"
+  }
+}
